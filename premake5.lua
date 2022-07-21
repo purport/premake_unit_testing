@@ -1,9 +1,30 @@
 
-local gcc = premake.tools.gcc
+local msc = premake.tools.msc
+local oldgetlinks_msc = msc.getlinks
+function msc.getlinks (cfg, systemonly, nogroups)
+  local flags = oldgetlinks_msc(cfg, systemonly, nogroups)
 
-local oldgetlinks = gcc.getlinks
+  local cpy = {}
+  for _, flag in ipairs(flags) do
+    local endswith = function(s, ptrn)
+      return ptrn == string.sub(s, -string.len(ptrn))
+    end
+    if endswith(flag, ":whole.lib") then
+      flag = string.sub(flag, 0, -11)
+      table.insert(cpy, "-WHOLEARCHIVE:" ..flag..".lib")
+    else
+      table.insert(cpy, flag)
+    end
+  end
+
+  return cpy
+end
+
+
+local gcc = premake.tools.gcc
+local oldgetlinks_gcc = gcc.getlinks
 function gcc.getlinks (cfg, systemonly, nogroups)
-  local flags = oldgetlinks(cfg, systemonly, nogroups)
+  local flags = oldgetlinks_gcc(cfg, systemonly, nogroups)
 
   local cpy = {}
   for _, flag in ipairs(flags) do
@@ -24,7 +45,9 @@ end
 
 workspace "AProjectWithUnitTests"
    configurations { "Debug", "Release" }
+
 linkgroups 'on'
+
 project "Lib"
    kind "StaticLib"
    language "C++"
@@ -83,8 +106,8 @@ project "HelloWorld"
    files { "src/hello-world.cpp" }
    includedirs { "lib" }
    libdirs { "bin/%{cfg.buildcfg}" }
-   links { "Lib" }
-   links { "HelloWorldUnitTests1:whole", "HelloWorldUnitTests2:whole" }
+   links { "HelloWorldUnitTests1", "HelloWorldUnitTests2" }
+   links { "Lib", "HelloWorldUnitTests1:whole", "HelloWorldUnitTests2:whole" }
 
    filter "configurations:Debug"
       defines { "DEBUG" }
