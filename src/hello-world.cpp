@@ -1,6 +1,7 @@
 #include <vector>
 #include <iostream>
 
+#include "lib.hpp"
 #include "unit_test.hpp"
 
 std::vector<UnitTest *> UnitTests;
@@ -20,4 +21,5 @@ int main() {
 
   std::cout << "The tests should have run before this." << std::endl;
   std::cout << "Hello World" << std::endl;
+  std::cout << add_one(3) << std::endl;
 }

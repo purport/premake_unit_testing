@@ -81,6 +81,7 @@ project "HelloWorld"
    targetdir "bin/%{cfg.buildcfg}"
 
    files { "src/hello-world.cpp" }
+   includedirs { "lib" }
    libdirs { "bin/%{cfg.buildcfg}" }
    links { "Lib" }
    links { "HelloWorldUnitTests1:whole", "HelloWorldUnitTests2:whole" }
